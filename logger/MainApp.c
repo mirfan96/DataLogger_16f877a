@@ -18,13 +18,20 @@
 #include "global.h"
 #include <stdio.h>
 
-void main(void)
+unsigned int value = 0;
+
+void user_timer_callback(void)
 {
+    value++;
+}
+
+void main()
+{    
+    char string[75];
     unsigned int adc_val;
-    char string[20];
     
-    TRISD=0X00;
-    PORTD=0X00;      
+    /* Configure PORTD as output to blink the LEDs. */
+    TRISD=0x00;
 
     /* Initialize the UART controller. */
     UART_Init();
@@ -32,24 +39,19 @@ void main(void)
     /* Initialize the ADC controller. */
     ADC_Init();
     
-    UART_TxString("Starting Test application\n\r");
-
+    /* Initialize the timer. */
+    if ( TIMER_init(10) )
+        while(1);
+    
+    /* Kick start the timer. */
+    TIMER_Start();
+    
     while(1)
     {
         adc_val = ADC_StartConversion(0);        
         
-        sprintf(string, "ADC Value = %f\n\r", (double) (adc_val * 4.8875) / 1000);
-        
+        sprintf(string, "ADC Value = \t\t%0.3f\n\rTimer Interrupts = \t%d\n\r", (double) (adc_val * 4.8875) / 1000, value);
         UART_TxString(string);
         
-        UART_TxString("Turning LEDs OFF\n\r");
-        PORTD=0XFF;
-        __delay_ms(100);
-
-       UART_TxString("Turning LEDs ON\n\r");
-       PORTD=0X00;
-       __delay_ms(100);
     }
-
-    return;
 }

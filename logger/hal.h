@@ -12,6 +12,10 @@
 extern "C" {
 #endif
 
+/* TIMER1 public routines. */
+char TIMER_init(char time_period);
+void TIMER_Start();
+
 /* ADC public routines. */
 void ADC_Init();
 unsigned int ADC_StartConversion(unsigned char channel);
