@@ -15,6 +15,98 @@
 
 #include "global.h"
 
+/* Global variable to hold received character. */
+char rx_data;
+
+/* Global flag to indicate valid data is present in rx_data. */
+char valid_rx_data;
+
+/***********************************************************************
+*
+*     FUNCTION
+*
+*         uart_rx_isr
+*
+*     DESCRIPTION
+*
+*         This function is the UART RX ISR.         
+*
+*     INPUTS
+*
+*         None
+*
+*     OUTPUTS
+*
+*         None
+*
+***********************************************************************/
+void uart_rx_isr()
+{  
+    /* If over run error, then reset the receiver. */
+    if(OERR)
+    {
+        CREN = 0;
+        CREN = 1;
+    }
+    
+    /* Read the data byte into global variable. */
+    rx_data = RCREG;
+    
+    /* Set the flag to indicate that valid data is available in the RX
+     *  register. */
+    valid_rx_data = 1;
+}
+
+/***********************************************************************
+*
+*     FUNCTION
+*
+*         UART_Read
+*
+*     DESCRIPTION
+*
+*         This function reads a character from the UART buffer.         
+*
+*     INPUTS
+*
+*         rxbyte - pointer to where we return the received character.
+*         block - Should we block until a character is received?
+*
+*     OUTPUTS
+*
+*         None
+*
+***********************************************************************/
+void UART_Read(char *rxbyte, char block)
+{
+    /* Check if valid data is available in the UART buffer. */
+    if(valid_rx_data == 0)
+    {
+        /* Check if we need to wait for data. */
+        if(block)
+        {
+            while(valid_rx_data == 0);
+            
+            /* Get the received data. */
+            *rxbyte = rx_data;
+            
+            /* Reset the valid data flag. */
+            valid_rx_data = 0;
+        }
+        else
+        {
+            *rxbyte = 0x00;
+        }
+    }
+    else
+    {
+        /* Get the received data. */
+        *rxbyte = rx_data;
+        
+        /* Reset the valid data flag. */
+        valid_rx_data = 0;
+    }
+}
 /***********************************************************************
 *
 *     FUNCTION
@@ -42,8 +134,11 @@ void UART_Init()
     /* Asynchronous mode, 8-bit data & enable transmitter */
     TXSTA = 0x24;      
     
-    /* 8-bit continous receive enable */
+    /* 8-bit continuous receive enable */
     RCSTA = 0x90;      
+    
+    /* Enable RX interrupt. */
+    RCIE = 1;
     
     /* 9600 Baud rate at 4MHz */
     SPBRG = 25;  
@@ -107,4 +202,3 @@ void UART_TxString(const unsigned char *string)
         UART_TxChar(*string++);
     }
 }
-

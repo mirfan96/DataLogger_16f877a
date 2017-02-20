@@ -18,6 +18,7 @@
       <itemPath>adc.c</itemPath>
       <itemPath>MainApp.c</itemPath>
       <itemPath>timer.c</itemPath>
+      <itemPath>InterruptHandler.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

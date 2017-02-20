@@ -22,7 +22,7 @@ char timer_high_val = 0,
 *
 *     FUNCTION
 *
-*         timer_isr
+*         timer1_isr
 *
 *     DESCRIPTION
 *
@@ -37,22 +37,15 @@ char timer_high_val = 0,
 *         None
 *
 ***********************************************************************/
-void interrupt timer_isr()
+void timer1_isr()
 {  
-    /* Check if the timer overflow flag is set. */
-    if(TMR1IF==1)
-    {
-        /* Reload the timer. */
-        TMR1H = timer_high_val;
-        TMR1L = timer_low_val;
+    /* Reload the timer. */
+    TMR1H = timer_high_val;
+    TMR1L = timer_low_val;
         
 #if (defined(_USER_TIMER_FUNC) && (_USER_TIMER_FUNC == true))
-        user_timer_callback();
+    user_timer_callback();
 #endif
-        
-        /* Clear the timer overflow flag. */
-        TMR1IF=0;
-    } 
 }
 
 /***********************************************************************
@@ -119,14 +112,8 @@ char TIMER_init(char time_period)
 ***********************************************************************/
 void TIMER_Start()
 {
-        /* Enable timer interrupt bit in PIE1 register. */
-    TMR1IE = 1;       
-    
-    /* Enable Global Interrupt. */
-    GIE = 1;          
-    
-    /* Enable the Peripheral Interrupt. */
-    PEIE = 1;         
+    /* Enable timer interrupt bit in PIE1 register. */
+    TMR1IE = 1;            
     
     /* Start Timer1. */
     TMR1ON = 1;
